@@ -47,6 +47,19 @@ jobs:
             exit 1
           fi
           echo 'Confirmed baseline Red: Claim deletion removes a foreign VLAN'
+      - name: Research assertion - expect Red for foreign L2VPN and IP range
+        shell: bash
+        run: |
+          set +e
+          go test ./internal/controller -run '^TestResearchForeign(L2VPN|IpRange)SurvivesClaimDeletion$' -count=1 -v > ownership.log 2>&1
+          rc=$?
+          set -e
+          grep 'FOREIGN_L2VPN_DELETED' ownership.log
+          grep 'FOREIGN_IPRANGE_DELETED' ownership.log
+          if [ "$rc" -eq 0 ]; then
+            echo 'Expected baseline Red but assertions passed'
+            exit 1
+          fi
       - name: Controller compilation
         run: go test ./internal/controller -run '^$' -count=1
       - name: Install Kubernetes envtest
