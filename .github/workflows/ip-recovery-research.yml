@@ -50,5 +50,7 @@ jobs:
         run: go test ./internal/controller -run '^TestResearchRealLifecycleReplacementBeforeClaimDeletion$' -count=1 -timeout=6m -v
       - name: NetBox DELETE propagation - no foreign delete
         run: go test ./internal/controller -run '^TestResearchForeignVlanNetboxDeletePropagation$' -count=1 -timeout=6m -v
+      - name: Live manager restart - preserve foreign VLAN
+        run: go test ./internal/controller -run '^TestResearchManagerRestartAfterVlanReplacement$' -count=1 -timeout=4m -v
       - name: Existing relevant Claim integration suites
         run: go test ./internal/controller -run '^TestControllers$' -ginkgo.focus='IpAddressClaim Controller|VlanClaim Controller|L2VPNClaim Controller|IpRangeClaim Controller' -ginkgo.fail-fast -count=1 -timeout=15m
