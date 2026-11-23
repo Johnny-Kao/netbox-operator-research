@@ -30,6 +30,7 @@ import (
 	"github.com/swisscom/leaselocker"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apismeta "k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -87,6 +88,11 @@ func (r *L2VPNClaimReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 			if !apierrors.IsNotFound(err) {
 				return ctrl.Result{}, err
 			}
+			return ctrl.Result{}, removeFinalizer(ctx, r.Client, o, L2VPNClaimFinalizerName)
+		}
+
+		// Do not delete a same-name resource that is not controlled by this claim.
+		if !metav1.IsControlledBy(l2vpn, o) {
 			return ctrl.Result{}, removeFinalizer(ctx, r.Client, o, L2VPNClaimFinalizerName)
 		}
 
