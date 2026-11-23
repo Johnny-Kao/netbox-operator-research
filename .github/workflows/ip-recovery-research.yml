@@ -36,6 +36,8 @@ jobs:
           fi
       - name: VLAN ownership regression - both directions
         run: go test ./internal/controller -run '^TestResearch(ForeignVlanSurvivesClaimDeletion|OwnedVlanIsRemovedWithDeletingClaim)$' -count=1 -v
+      - name: L2VPN and IP range foreign-resource preservation
+        run: go test ./internal/controller -run '^TestResearchForeign(L2VPN|IpRange)SurvivesClaimDeletion$' -count=1 -v
       - name: Controller compile
         run: go test ./internal/controller -run '^$' -count=1
       - name: Install envtest assets
