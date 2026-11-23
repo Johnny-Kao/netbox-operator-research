@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: Johnny-Kao/netbox-operator
-          ref: 3025252f114964d0b28fbfd13c0931a6ba350e3a
+          ref: 626535384622df87c556678b31b41281f0fb65e3
       - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: Johnny-Kao/netbox-operator
-          ref: 3025252f114964d0b28fbfd13c0931a6ba350e3a
+          ref: 626535384622df87c556678b31b41281f0fb65e3
       - uses: codespell-project/actions-codespell@v2
         with:
           skip: "*.svg,go.sum"
@@ -42,5 +42,5 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: Johnny-Kao/netbox-operator
-          ref: 3025252f114964d0b28fbfd13c0931a6ba350e3a
+          ref: 626535384622df87c556678b31b41281f0fb65e3
       - uses: karancode/yamllint-github-action@master
