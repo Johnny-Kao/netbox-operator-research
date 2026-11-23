@@ -80,11 +80,11 @@ func TestResearchForeignVlanNetboxDeletePropagation(t *testing.T) {
     mockAPI := mock_interfaces.NewMockIpamAPI(mockCtrl)
     mockDelete := mock_interfaces.NewMockIpamVlansDestroyRequest(mockCtrl)
     netboxDeletes := 0
-    mockAPI.EXPECT().IpamVlansDestroy(gomock.Any(), netboxID).DoAndReturn(func(_ context.Context, _ int32) interface{} {
+    mockAPI.EXPECT().IpamVlansDestroy(gomock.Any(), netboxID).Return(mockDelete).AnyTimes()
+    mockDelete.EXPECT().Execute().DoAndReturn(func() (*http.Response, error) {
         netboxDeletes++
-        return mockDelete
+        return &http.Response{StatusCode: 204, Body: http.NoBody}, nil
     }).AnyTimes()
-    mockDelete.EXPECT().Execute().Return(&http.Response{StatusCode: 204, Body: http.NoBody}, nil).AnyTimes()
 
     if !current.DeletionTimestamp.IsZero() {
         vlanR := &VlanReconciler{
