@@ -37,12 +37,12 @@ jobs:
       - name: VLAN ownership regression - both directions
         run: go test ./internal/controller -run '^TestResearch(ForeignVlanSurvivesClaimDeletion|OwnedVlanIsRemovedWithDeletingClaim)$' -count=1 -v
       - name: L2VPN and IP range foreign-resource preservation
-        run: go test ./internal/controller -run '^TestResearchForeign(L2VPN|IpRange)SurvivesClaimDeletion$' -count=1 -v
+        run: go test ./internal/controller -run '^TestResearch(Foreign(L2VPN|IpRange)SurvivesClaimDeletion|Owned(L2VPN|IpRange)RemovedWithDeletingClaim)$' -count=1 -v
       - name: Controller compile
         run: go test ./internal/controller -run '^$' -count=1
       - name: Install envtest assets
         run: |
           go install sigs.k8s.io/controller-runtime/tools/setup-envtest@release-0.23
           "$(go env GOPATH)/bin/setup-envtest" use 1.33.0 --bin-dir bin -p path
-      - name: Existing IP Claim integration suite
-        run: go test ./internal/controller -run '^TestControllers$' -ginkgo.focus='IpAddressClaim Controller' -ginkgo.fail-fast -count=1 -timeout=15m
+      - name: Existing relevant Claim integration suites
+        run: go test ./internal/controller -run '^TestControllers$' -ginkgo.focus='IpAddressClaim Controller|VlanClaim Controller|L2VPNClaim Controller|IpRangeClaim Controller' -ginkgo.fail-fast -count=1 -timeout=15m
