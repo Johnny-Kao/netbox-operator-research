@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: Johnny-Kao/netbox-operator
-          ref: 626535384622df87c556678b31b41281f0fb65e3
+          ref: dcc14a5c7b7da029b5993509890d6cf5d4fc1534
       - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
