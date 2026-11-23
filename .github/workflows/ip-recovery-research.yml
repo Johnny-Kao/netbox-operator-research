@@ -30,6 +30,6 @@ jobs:
       - name: Install Kubernetes envtest
         run: |
           go install sigs.k8s.io/controller-runtime/tools/setup-envtest@release-0.23
-          "$(go env GOPATH)/bin/setup-envtest" use 1.33.0 --bin-dir bin/k8s -p path
+          "$(go env GOPATH)/bin/setup-envtest" use 1.33.0 --bin-dir bin -p path
       - name: Existing IP Address Claim integration suite
         run: go test ./internal/controller -run '^TestControllers$' -ginkgo.focus='IpAddressClaim Controller' -ginkgo.fail-fast -count=1 -timeout=15m
