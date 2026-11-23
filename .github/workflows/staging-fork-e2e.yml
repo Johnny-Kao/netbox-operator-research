@@ -1,0 +1,50 @@
+name: Staging fork E2E matrix
+
+on:
+  push:
+    branches:
+      - research/ip-claim-recovery
+    paths:
+      - .github/workflows/staging-fork-e2e.yml
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    name: NetBox ${{ matrix.netbox }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    strategy:
+      fail-fast: false
+      matrix:
+        netbox: ['3.7.8', '4.0.11', '4.1.10', '4.4.9']
+    env:
+      NETBOX_HOST: demo.netbox.dev
+      POD_NAMESPACE: default
+      HTTPS_ENABLE: 'true'
+      NETBOX_RESTORATION_HASH_FIELD_NAME: netboxOperatorRestorationHash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Johnny-Kao/netbox-operator
+          ref: 3025252f114964d0b28fbfd13c0931a6ba350e3a
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: Set public test fixture credentials
+        shell: bash
+        run: |
+          token=$(awk '/^[[:space:]]*AUTH_TOKEN: / {print $2; exit}' .github/workflows/e2e-tests.yaml)
+          test -n "$token"
+          echo "AUTH_TOKEN=$token" >> "$GITHUB_ENV"
+      - name: Install kind and kubectl
+        run: |
+          curl -fsSL -o /tmp/kind https://kind.sigs.k8s.io/dl/v0.33.0/kind-linux-amd64
+          sudo install /tmp/kind /usr/local/bin/kind
+          curl -fsSL -o /tmp/kubectl https://dl.k8s.io/release/v1.34.1/bin/linux/amd64/kubectl
+          sudo install /tmp/kubectl /usr/local/bin/kubectl
+          kind version
+          kubectl version --client
+      - name: Run upstream E2E target
+        run: make test-e2e-${{ matrix.netbox }}
