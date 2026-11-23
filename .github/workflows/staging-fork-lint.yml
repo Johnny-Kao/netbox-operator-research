@@ -1,0 +1,46 @@
+name: Staging fork lint and metadata checks
+
+on:
+  push:
+    branches:
+      - research/ip-claim-recovery
+    paths:
+      - .github/workflows/staging-fork-lint.yml
+
+permissions:
+  contents: read
+
+jobs:
+  golangci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Johnny-Kao/netbox-operator
+          ref: 3025252f114964d0b28fbfd13c0931a6ba350e3a
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.11.2
+          args: --config tools/.golangci.yaml
+  codespell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Johnny-Kao/netbox-operator
+          ref: 3025252f114964d0b28fbfd13c0931a6ba350e3a
+      - uses: codespell-project/actions-codespell@v2
+        with:
+          skip: "*.svg,go.sum"
+  yamllint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Johnny-Kao/netbox-operator
+          ref: 3025252f114964d0b28fbfd13c0931a6ba350e3a
+      - uses: karancode/yamllint-github-action@master
