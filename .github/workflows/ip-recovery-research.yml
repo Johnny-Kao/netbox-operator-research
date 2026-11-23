@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - research/ip-claim-recovery
+      - research/vlan-foreign-ownership-fix
   workflow_dispatch:
 
 permissions:
@@ -34,19 +35,8 @@ jobs:
             exit 1
           fi
           echo 'Confirmed baseline Red: ambiguous restoration key encoding'
-      - name: Research assertion - expect Red from unowned VLAN deletion
-        shell: bash
-        run: |
-          set +e
-          go test ./internal/controller -run '^TestResearchForeignVlanSurvivesClaimDeletion$' -count=1 -v > foreign-vlan.log 2>&1
-          rc=$?
-          set -e
-          grep 'FOREIGN_VLAN_DELETED' foreign-vlan.log || { cat foreign-vlan.log; exit 1; }
-          if [ "$rc" -eq 0 ]; then
-            echo 'Expected baseline Red, but test unexpectedly passed'
-            exit 1
-          fi
-          echo 'Confirmed baseline Red: Claim deletion removes a foreign VLAN'
+      - name: Regression - preserve VLAN not controlled by claim
+        run: go test ./internal/controller -run '^TestResearchForeignVlanSurvivesClaimDeletion$' -count=1 -v
       - name: Controller compilation
         run: go test ./internal/controller -run '^$' -count=1
       - name: Install Kubernetes envtest
