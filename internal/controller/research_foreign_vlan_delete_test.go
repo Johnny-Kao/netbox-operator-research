@@ -49,3 +49,46 @@ func TestResearchForeignVlanSurvivesClaimDeletion(t *testing.T) {
         t.Fatalf("lookup: %v", err)
     }
 }
+
+
+func TestResearchOwnedVlanIsRemovedWithDeletingClaim(t *testing.T) {
+    scheme := runtime.NewScheme()
+    if err := netboxv1.AddToScheme(scheme); err != nil {
+        t.Fatal(err)
+    }
+    now := metav1.NewTime(time.Now())
+    uid := types.UID("claim-uid")
+    controller := true
+    claim := &netboxv1.VlanClaim{
+        ObjectMeta: metav1.ObjectMeta{
+            Namespace: "default",
+            Name: "owned-vlan",
+            UID: uid,
+            Finalizers: []string{VlanClaimFinalizerName},
+            DeletionTimestamp: &now,
+        },
+    }
+    owned := &netboxv1.Vlan{
+        ObjectMeta: metav1.ObjectMeta{
+            Namespace: "default",
+            Name: "owned-vlan",
+            OwnerReferences: []metav1.OwnerReference{{
+                APIVersion: "netbox.dev/v1",
+                Kind: "VlanClaim",
+                Name: claim.Name,
+                UID: uid,
+                Controller: &controller,
+            }},
+        },
+        Spec: netboxv1.VlanSpec{Vid: 102},
+    }
+    client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(claim, owned).Build()
+    reconciler := &VlanClaimReconciler{Client: client, Scheme: scheme}
+    key := types.NamespacedName{Namespace: "default", Name: "owned-vlan"}
+    if _, err := reconciler.Reconcile(context.Background(), ctrl.Request{NamespacedName: key}); err != nil {
+        t.Fatalf("reconcile: %v", err)
+    }
+    if err := client.Get(context.Background(), key, &netboxv1.Vlan{}); !apierrors.IsNotFound(err) {
+        t.Fatalf("owned VLAN should be deleted, lookup error: %v", err)
+    }
+}
