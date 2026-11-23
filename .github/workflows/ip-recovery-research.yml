@@ -78,5 +78,17 @@ jobs:
             echo 'Expected real-API baseline Red, got Green'
             exit 1
           fi
+      - name: Real Kubernetes replacement lifecycle - expected baseline Red
+        shell: bash
+        run: |
+          set +e
+          go test ./internal/controller -run '^TestResearchRealLifecycleReplacementBeforeClaimDeletion$' -count=1 -timeout=6m -v > replacement.log 2>&1
+          rc=$?
+          set -e
+          grep 'REAL_LIFECYCLE_FOREIGN_VLAN_DELETED' replacement.log || { cat replacement.log; exit 1; }
+          if [ "$rc" -eq 0 ]; then
+            echo 'Expected baseline Red but test passed'
+            exit 1
+          fi
       - name: Existing IP Address Claim integration suite
         run: go test ./internal/controller -run '^TestControllers$' -ginkgo.focus='IpAddressClaim Controller' -ginkgo.fail-fast -count=1 -timeout=15m
