@@ -1,0 +1,51 @@
+name: Staging fork validation
+
+on:
+  push:
+    paths:
+      - .github/workflows/staging-fork-validation.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Johnny-Kao/netbox-operator
+          ref: fix/claim-teardown-ownership
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - run: make test
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Johnny-Kao/netbox-operator
+          ref: fix/claim-teardown-ownership
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - run: go install github.com/onsi/ginkgo/v2/ginkgo
+      - run: make integration-test
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Johnny-Kao/netbox-operator
+          ref: fix/claim-teardown-ownership
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - run: make fmt
+      - run: make vet
+      - run: make generate manifests && git diff --exit-code
